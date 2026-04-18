@@ -39,7 +39,7 @@ class KeyEventMonitor: ObservableObject {
     func startTap() {
         guard eventTap == nil else { return }
         
-        let eventMask = (1 << CGEventType.keyDown.rawValue)
+        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
         let tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
@@ -61,23 +61,38 @@ class KeyEventMonitor: ObservableObject {
     }
 }
 
+fileprivate var interceptedKeyCodes: Set<Int64> = []
+
 private func cgEventCallback(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
     let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-    let flags = event.flags
     
-    let hasControl = flags.contains(.maskControl)
-    let hasShift = flags.contains(.maskShift)
-    let hasCommand = flags.contains(.maskCommand)
-    let hasOption = flags.contains(.maskAlternate)
+    if type == .keyUp {
+        if interceptedKeyCodes.contains(keyCode) {
+            interceptedKeyCodes.remove(keyCode)
+            return nil // 握りつぶしたkeyDownに対応するkeyUpも破棄
+        }
+        return Unmanaged.passUnretained(event)
+    }
     
-    // Control + Shift のみが押されている状態 (CommandとOptionは押されていない)
-    if hasControl && hasShift && !hasCommand && !hasOption {
-        if keyCode == 38 { // J
-            postVirtualKey(keyCode: 104) // かな
-            return nil // 元のイベントを破棄
-        } else if keyCode == 41 { // ;
-            postVirtualKey(keyCode: 102) // 英数
-            return nil // 元のイベントを破棄
+    if type == .keyDown {
+        let flags = event.flags
+        
+        let hasControl = flags.contains(.maskControl)
+        let hasShift = flags.contains(.maskShift)
+        let hasCommand = flags.contains(.maskCommand)
+        let hasOption = flags.contains(.maskAlternate)
+        
+        // Control + Shift のみが押されている状態 (CommandとOptionは押されていない)
+        if hasControl && hasShift && !hasCommand && !hasOption {
+            if keyCode == 38 { // J
+                interceptedKeyCodes.insert(keyCode)
+                postVirtualKey(keyCode: 104) // かな
+                return nil // 元のイベントを破棄
+            } else if keyCode == 41 { // ;
+                interceptedKeyCodes.insert(keyCode)
+                postVirtualKey(keyCode: 102) // 英数
+                return nil // 元のイベントを破棄
+            }
         }
     }
     
@@ -88,6 +103,10 @@ private func postVirtualKey(keyCode: CGKeyCode) {
     let source = CGEventSource(stateID: .hidSystemState)
     let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)
     let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
+    
+    // 修飾キー（ControlやShift）が仮想イベントに乗らないようにリセット
+    keyDown?.flags = CGEventFlags()
+    keyUp?.flags = CGEventFlags()
     
     keyDown?.post(tap: .cghidEventTap)
     keyUp?.post(tap: .cghidEventTap)
