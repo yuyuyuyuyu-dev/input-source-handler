@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # e.g. runs when a tag like v1.0.0 is pushed
+
+jobs:
+  build_and_release:
+    name: Build and Release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build App
+        run: |
+          xcodebuild -project InputSourceHandler.xcodeproj \
+            -scheme InputSourceHandler \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            SYMROOT=$PWD/build \
+            clean build
+
+      - name: Zip App
+        run: |
+          cd build/Release
+          # Zip the application bundle
+          zip -ry ../../InputSourceHandler.zip InputSourceHandler.app
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true # Creates a draft release that won't be published until you manually publish it
+          files: InputSourceHandler.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,16 +2,26 @@
 //  InputSourceHandlerApp.swift
 //  InputSourceHandler
 //
-//  Created by Yu on 2026/04/18.
-//
 
 import SwiftUI
 
 @main
 struct InputSourceHandlerApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var monitor = KeyEventMonitor()
+
     var body: some Scene {
-        WindowGroup {
+        MenuBarExtra("InputSourceHandler", systemImage: "keyboard") {
             ContentView()
+                .environmentObject(monitor)
         }
+        .menuBarExtraStyle(.window)
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Run as an accessory app without a Dock icon
+        NSApp.setActivationPolicy(.accessory)
     }
 }
