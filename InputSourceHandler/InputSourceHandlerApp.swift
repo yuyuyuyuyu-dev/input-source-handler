@@ -21,7 +21,7 @@ struct InputSourceHandlerApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Dockにアイコンを表示しないアクセサリモードに設定
+        // Run as an accessory app without a Dock icon
         NSApp.setActivationPolicy(.accessory)
     }
 }

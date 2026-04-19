@@ -10,7 +10,7 @@ class KeyEventMonitor: ObservableObject {
     init() {
         checkAccessibility(prompt: true)
         
-        // もし権限がない場合は、定期的にチェックして権限が付与されたら開始する
+        // If accessibility permission is not granted, check periodically until it is
         if !isTrusted {
             timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
                 self?.checkAccessibility(prompt: false)
@@ -50,7 +50,7 @@ class KeyEventMonitor: ObservableObject {
         )
 
         guard let tap = tap else {
-            print("Event tapの作成に失敗しました")
+            print("Failed to create event tap")
             return
         }
 
@@ -69,7 +69,7 @@ private func cgEventCallback(proxy: CGEventTapProxy, type: CGEventType, event: C
     if type == .keyUp {
         if interceptedKeyCodes.contains(keyCode) {
             interceptedKeyCodes.remove(keyCode)
-            return nil // 握りつぶしたkeyDownに対応するkeyUpも破棄
+            return nil // Discard the keyUp event corresponding to the intercepted keyDown
         }
         return Unmanaged.passUnretained(event)
     }
@@ -82,16 +82,16 @@ private func cgEventCallback(proxy: CGEventTapProxy, type: CGEventType, event: C
         let hasCommand = flags.contains(.maskCommand)
         let hasOption = flags.contains(.maskAlternate)
         
-        // Control + Shift のみが押されている状態 (CommandとOptionは押されていない)
+        // Only Control + Shift are pressed (Command and Option are not pressed)
         if hasControl && hasShift && !hasCommand && !hasOption {
             if keyCode == 38 { // J
                 interceptedKeyCodes.insert(keyCode)
-                postVirtualKey(keyCode: 104) // かな
-                return nil // 元のイベントを破棄
+                postVirtualKey(keyCode: 104) // Kana
+                return nil // Discard original event
             } else if keyCode == 41 { // ;
                 interceptedKeyCodes.insert(keyCode)
-                postVirtualKey(keyCode: 102) // 英数
-                return nil // 元のイベントを破棄
+                postVirtualKey(keyCode: 102) // Eisu (Alphanumeric)
+                return nil // Discard original event
             }
         }
     }
@@ -104,7 +104,7 @@ private func postVirtualKey(keyCode: CGKeyCode) {
     let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)
     let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
     
-    // 修飾キー（ControlやShift）が仮想イベントに乗らないようにリセット
+    // Clear modifier flags so that physical modifiers (Control, Shift) don't leak into virtual events
     keyDown?.flags = CGEventFlags()
     keyUp?.flags = CGEventFlags()
     

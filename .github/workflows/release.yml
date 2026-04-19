@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*' # 例: v1.0.0 などのタグがプッシュされた時に実行されます
+      - 'v*' # e.g. runs when a tag like v1.0.0 is pushed
 
 jobs:
   build_and_release:
@@ -33,13 +33,13 @@ jobs:
       - name: Zip App
         run: |
           cd build/Release
-          # アプリケーションフォルダをZip圧縮します
+          # Zip the application bundle
           zip -ry ../../InputSourceHandler.zip InputSourceHandler.app
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          draft: true # trueにすると下書き（ドラフト）として作成され、手動で公開ボタンを押すまで公開されません
+          draft: true # Creates a draft release that won't be published until you manually publish it
           files: InputSourceHandler.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
