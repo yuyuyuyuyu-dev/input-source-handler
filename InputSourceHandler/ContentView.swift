@@ -4,9 +4,11 @@
 //
 
 import SwiftUI
+import ServiceManagement
 
 struct ContentView: View {
     @EnvironmentObject var monitor: KeyEventMonitor
+    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     var body: some View {
         VStack(spacing: 16) {
@@ -45,6 +47,24 @@ struct ContentView: View {
                 Text("⌃ + ⇧ + ;  →  英数")
                     .font(.caption)
             }
+            
+            Divider()
+            
+            Toggle("ログイン時に開く", isOn: $launchAtLogin)
+                .onChange(of: launchAtLogin) { newValue in
+                    do {
+                        if newValue {
+                            if SMAppService.mainApp.status == .enabled { return }
+                            try SMAppService.mainApp.register()
+                        } else {
+                            try SMAppService.mainApp.unregister()
+                        }
+                    } catch {
+                        print("Failed to change login item: \(error)")
+                        launchAtLogin = SMAppService.mainApp.status == .enabled
+                    }
+                }
+                .font(.caption)
             
             Divider()
             
