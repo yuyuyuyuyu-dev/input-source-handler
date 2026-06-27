@@ -14,7 +14,7 @@ concurrency:
 jobs:
   format:
     name: Format (SwiftFormat)
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -27,7 +27,7 @@ jobs:
 
   lint:
     name: Lint (SwiftLint)
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -40,7 +40,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -62,7 +62,7 @@ jobs:
 
   test:
     name: Test
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
