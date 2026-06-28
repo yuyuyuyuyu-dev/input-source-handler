@@ -20,7 +20,7 @@ struct InputSourceHandlerApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    func applicationDidFinishLaunching(_: Notification) {
         // Run as an accessory app without a Dock icon
         NSApp.setActivationPolicy(.accessory)
     }

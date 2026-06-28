@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# Cancel an in-progress run when a newer commit is pushed to the same ref/PR.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Format (SwiftFormat)
+    runs-on: macos-26
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Install SwiftFormat
+        run: brew install swiftformat
+
+      - name: Check Formatting
+        run: swiftformat --lint .
+
+  lint:
+    name: Lint (SwiftLint)
+    runs-on: macos-26
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint
+
+  build:
+    name: Build
+    runs-on: macos-26
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build App
+        run: |
+          xcodebuild build \
+            -project InputSourceHandler.xcodeproj \
+            -scheme InputSourceHandler \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+  test:
+    name: Test
+    runs-on: macos-26
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Run Tests
+        run: |
+          xcodebuild test \
+            -project InputSourceHandler.xcodeproj \
+            -scheme InputSourceHandler \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO

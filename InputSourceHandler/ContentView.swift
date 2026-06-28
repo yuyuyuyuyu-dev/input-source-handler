@@ -3,8 +3,8 @@
 //  InputSourceHandler
 //
 
-import SwiftUI
 import ServiceManagement
+import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var monitor: KeyEventMonitor
@@ -16,10 +16,10 @@ struct ContentView: View {
                 .imageScale(.large)
                 .font(.system(size: 32))
                 .foregroundStyle(.tint)
-            
+
             Text("InputSourceHandler")
                 .font(.headline)
-            
+
             if monitor.isTrusted {
                 Text("✅ アクセシビリティ権限が許可されています。\nバックグラウンドで動作中です。")
                     .multilineTextAlignment(.center)
@@ -30,15 +30,15 @@ struct ContentView: View {
                     .multilineTextAlignment(.center)
                     .font(.caption)
                     .foregroundColor(.red)
-                
+
                 Button("システム設定を開く") {
                     let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
                     NSWorkspace.shared.open(url)
                 }
             }
-            
+
             Divider()
-            
+
             VStack(alignment: .leading, spacing: 8) {
                 Text("ショートカット:")
                     .font(.caption).bold()
@@ -47,9 +47,9 @@ struct ContentView: View {
                 Text("⌃ + ⇧ + ;  →  英数")
                     .font(.caption)
             }
-            
+
             Divider()
-            
+
             Toggle("ログイン時に開く", isOn: $launchAtLogin)
                 .onChange(of: launchAtLogin) { newValue in
                     do {
@@ -65,9 +65,9 @@ struct ContentView: View {
                     }
                 }
                 .font(.caption)
-            
+
             Divider()
-            
+
             Button("終了") {
                 NSApplication.shared.terminate(nil)
             }
