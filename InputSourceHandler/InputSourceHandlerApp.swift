@@ -8,12 +8,12 @@ import SwiftUI
 @main
 struct InputSourceHandlerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @StateObject private var monitor = KeyEventMonitor()
+    @State private var monitor = KeyEventMonitor()
+    @State private var launchAtLogin = LaunchAtLoginSetting()
 
     var body: some Scene {
         MenuBarExtra("InputSourceHandler", systemImage: "keyboard") {
-            ContentView()
-                .environmentObject(monitor)
+            ContentView(monitor: monitor, launchAtLogin: launchAtLogin)
         }
         .menuBarExtraStyle(.window)
     }

@@ -3,14 +3,16 @@
 //  InputSourceHandler
 //
 
-import ServiceManagement
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var monitor: KeyEventMonitor
-    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    let monitor: KeyEventMonitor
+    let launchAtLogin: LaunchAtLoginSetting
+    var settingsOpener: any SettingsOpener = WorkspaceSettingsOpener()
 
     var body: some View {
+        @Bindable var launchAtLogin = launchAtLogin
+
         VStack(spacing: 16) {
             Image(systemName: "keyboard")
                 .imageScale(.large)
@@ -32,8 +34,7 @@ struct ContentView: View {
                     .foregroundColor(.red)
 
                 Button("システム設定を開く") {
-                    let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                    NSWorkspace.shared.open(url)
+                    settingsOpener.openAccessibilityPane()
                 }
             }
 
@@ -50,20 +51,7 @@ struct ContentView: View {
 
             Divider()
 
-            Toggle("ログイン時に開く", isOn: $launchAtLogin)
-                .onChange(of: launchAtLogin) { newValue in
-                    do {
-                        if newValue {
-                            if SMAppService.mainApp.status == .enabled { return }
-                            try SMAppService.mainApp.register()
-                        } else {
-                            try SMAppService.mainApp.unregister()
-                        }
-                    } catch {
-                        print("Failed to change login item: \(error)")
-                        launchAtLogin = SMAppService.mainApp.status == .enabled
-                    }
-                }
+            Toggle("ログイン時に開く", isOn: $launchAtLogin.isEnabled)
                 .font(.caption)
 
             Divider()
@@ -78,6 +66,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
-        .environmentObject(KeyEventMonitor())
+    ContentView(monitor: KeyEventMonitor(), launchAtLogin: LaunchAtLoginSetting())
 }
