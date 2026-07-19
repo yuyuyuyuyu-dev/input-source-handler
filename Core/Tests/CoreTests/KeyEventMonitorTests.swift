@@ -1,9 +1,9 @@
 //
 //  KeyEventMonitorTests.swift
-//  InputSourceHandlerTests
+//  CoreTests
 //
 
-@testable import InputSourceHandler
+@testable import Core
 import Testing
 
 struct KeyEventMonitorTests {

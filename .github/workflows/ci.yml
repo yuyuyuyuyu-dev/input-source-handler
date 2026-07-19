@@ -73,11 +73,4 @@ jobs:
           xcode-version: latest-stable
 
       - name: Run Tests
-        run: |
-          xcodebuild test \
-            -project InputSourceHandler.xcodeproj \
-            -scheme InputSourceHandler \
-            -destination 'platform=macOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+        run: swift test --package-path Core

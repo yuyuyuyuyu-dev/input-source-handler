@@ -1,11 +1,11 @@
 //
 //  ShortcutRemapperTests.swift
-//  InputSourceHandlerTests
+//  CoreTests
 //
 
 import Carbon.HIToolbox
+@testable import Core
 import CoreGraphics
-@testable import InputSourceHandler
 import Testing
 
 private let keyJ = Int64(kVK_ANSI_J)

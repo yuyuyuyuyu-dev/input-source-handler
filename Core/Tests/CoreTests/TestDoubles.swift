@@ -1,11 +1,11 @@
 //
 //  TestDoubles.swift
-//  InputSourceHandlerTests
+//  CoreTests
 //
 
+@testable import Core
 import CoreGraphics
 import Foundation
-@testable import InputSourceHandler
 
 final class AccessibilityPermissionStub: AccessibilityPermission {
     var isTrustedValue = false

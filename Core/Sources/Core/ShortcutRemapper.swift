@@ -1,6 +1,6 @@
 //
 //  ShortcutRemapper.swift
-//  InputSourceHandler
+//  Core
 //
 
 import Carbon.HIToolbox
@@ -8,8 +8,8 @@ import CoreGraphics
 
 /// Decides what to do with each keyboard event.
 /// Pure logic with no system calls, so it is fully testable.
-struct ShortcutRemapper {
-    enum Action: Equatable {
+public struct ShortcutRemapper {
+    public enum Action: Equatable {
         /// Let the event through unchanged.
         case passThrough
         /// Swallow the event (e.g. the keyUp of an already replaced keyDown).
@@ -21,7 +21,9 @@ struct ShortcutRemapper {
     /// Key codes whose keyDown was swallowed; the matching keyUp must be swallowed too.
     private var interceptedKeyCodes: Set<Int64> = []
 
-    mutating func handle(type: CGEventType, keyCode: Int64, flags: CGEventFlags) -> Action {
+    public init() {}
+
+    public mutating func handle(type: CGEventType, keyCode: Int64, flags: CGEventFlags) -> Action {
         switch type {
         case .keyDown:
             guard isTriggerChord(flags), let replacement = Self.replacement(for: keyCode) else {

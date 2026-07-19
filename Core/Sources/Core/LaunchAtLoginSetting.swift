@@ -1,6 +1,6 @@
 //
 //  LaunchAtLoginSetting.swift
-//  InputSourceHandler
+//  Core
 //
 
 import Foundation
@@ -8,15 +8,15 @@ import Observation
 
 /// Mirrors the "launch at login" registration state and reverts the toggle when a change fails.
 @Observable
-final class LaunchAtLoginSetting {
-    var isEnabled: Bool {
+public final class LaunchAtLoginSetting {
+    public var isEnabled: Bool {
         didSet { applyChange(from: oldValue) }
     }
 
     private let service: any LoginItemService
     @ObservationIgnored private var isReverting = false
 
-    init(service: any LoginItemService = MainAppLoginItem()) {
+    public init(service: any LoginItemService) {
         self.service = service
         isEnabled = service.isEnabled
     }
