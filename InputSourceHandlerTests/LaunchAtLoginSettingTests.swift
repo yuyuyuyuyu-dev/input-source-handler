@@ -7,8 +7,8 @@
 import Testing
 
 struct LaunchAtLoginSettingTests {
-    @Test("初期値はシステムの登録状態を反映し、登録操作は行わない", arguments: [true, false])
-    func initialValueReflectsSystemState(registered: Bool) {
+    @Test(arguments: [true, false])
+    func shouldReflectSystemStateAtInit(registered: Bool) {
         let service = LoginItemServiceFake(isEnabled: registered)
 
         let setting = LaunchAtLoginSetting(service: service)
@@ -17,8 +17,8 @@ struct LaunchAtLoginSettingTests {
         #expect(service.receivedRequests.isEmpty)
     }
 
-    @Test("有効にするとシステムへ登録を要求する")
-    func enableRegisters() {
+    @Test
+    func shouldRegisterWhenEnabled() {
         let service = LoginItemServiceFake(isEnabled: false)
         let setting = LaunchAtLoginSetting(service: service)
 
@@ -28,8 +28,8 @@ struct LaunchAtLoginSettingTests {
         #expect(service.isEnabled)
     }
 
-    @Test("無効にするとシステムへ解除を要求する")
-    func disableUnregisters() {
+    @Test
+    func shouldUnregisterWhenDisabled() {
         let service = LoginItemServiceFake(isEnabled: true)
         let setting = LaunchAtLoginSetting(service: service)
 
@@ -39,8 +39,8 @@ struct LaunchAtLoginSettingTests {
         #expect(!service.isEnabled)
     }
 
-    @Test("登録に失敗したら、トグルは実際の登録状態へ戻る")
-    func revertsWhenRegistrationFails() {
+    @Test
+    func shouldRevertWhenRegistrationFails() {
         let service = LoginItemServiceFake(isEnabled: false)
         service.nextError = FakeError()
         let setting = LaunchAtLoginSetting(service: service)
@@ -51,8 +51,8 @@ struct LaunchAtLoginSettingTests {
         #expect(service.receivedRequests == [true])
     }
 
-    @Test("解除に失敗したら、トグルは実際の登録状態へ戻る")
-    func revertsWhenUnregistrationFails() {
+    @Test
+    func shouldRevertWhenUnregistrationFails() {
         let service = LoginItemServiceFake(isEnabled: true)
         service.nextError = FakeError()
         let setting = LaunchAtLoginSetting(service: service)
@@ -63,8 +63,8 @@ struct LaunchAtLoginSettingTests {
         #expect(service.receivedRequests == [false])
     }
 
-    @Test("値が変わらない代入ではシステムを呼ばない")
-    func ignoresRedundantAssignment() {
+    @Test
+    func shouldIgnoreRedundantAssignment() {
         let service = LoginItemServiceFake(isEnabled: false)
         let setting = LaunchAtLoginSetting(service: service)
 
