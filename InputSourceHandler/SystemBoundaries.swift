@@ -144,3 +144,29 @@ struct WorkspaceSettingsOpener: SettingsOpener {
         NSWorkspace.shared.open(url)
     }
 }
+
+// MARK: - Inert implementations
+
+// Used by the app while unit tests host it, and by previews, so that composing
+// the object graph never prompts for permissions or touches the real system.
+
+struct InertAccessibilityPermission: AccessibilityPermission {
+    func isTrusted(promptIfNeeded _: Bool) -> Bool {
+        false
+    }
+}
+
+struct InertKeyEventTap: KeyEventTap {
+    @discardableResult
+    func start() -> Bool {
+        false
+    }
+}
+
+struct InertLoginItem: LoginItemService {
+    var isEnabled: Bool {
+        false
+    }
+
+    func setEnabled(_: Bool) throws {}
+}

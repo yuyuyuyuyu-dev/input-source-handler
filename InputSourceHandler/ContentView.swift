@@ -66,5 +66,8 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(monitor: KeyEventMonitor(), launchAtLogin: LaunchAtLoginSetting())
+    ContentView(
+        monitor: KeyEventMonitor(permission: InertAccessibilityPermission(), eventTap: InertKeyEventTap()),
+        launchAtLogin: LaunchAtLoginSetting(service: InertLoginItem())
+    )
 }
