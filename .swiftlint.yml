@@ -1,6 +1,11 @@
 excluded:
   - Core/.build
 
+# SwiftFormat's default inserts trailing commas in multiline collections;
+# align SwiftLint to require them too instead of fighting over it.
+trailing_comma:
+  mandatory_comma: true
+
 custom_rules:
   no_system_frameworks_in_core:
     name: "No system frameworks in Core"
