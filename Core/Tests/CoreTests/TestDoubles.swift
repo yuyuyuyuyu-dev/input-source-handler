@@ -4,8 +4,6 @@
 //
 
 @testable import Core
-import CoreGraphics
-import Foundation
 
 final class AccessibilityPermissionStub: AccessibilityPermission {
     var isTrustedValue = false

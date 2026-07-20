@@ -23,10 +23,11 @@ public struct SystemAccessibilityPermission: AccessibilityPermission {
 public struct HIDVirtualKeyPoster: VirtualKeyPoster {
     public init() {}
 
-    public func post(_ keyCode: CGKeyCode) {
+    public func post(_ keyCode: KeyCode) {
+        let virtualKey = CGKeyCode(keyCode.rawValue)
         let source = CGEventSource(stateID: .hidSystemState)
-        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)
-        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
+        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: virtualKey, keyDown: true)
+        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: virtualKey, keyDown: false)
 
         // Clear modifier flags so that physical modifiers (Control, Shift) don't leak into virtual events
         keyDown?.flags = CGEventFlags()
@@ -73,8 +74,12 @@ public final class CGKeyEventTap: KeyEventTap {
     }
 
     fileprivate func handle(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
-        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-        switch remapper.handle(type: type, keyCode: keyCode, flags: event.flags) {
+        let action = remapper.handle(
+            phase: phase(of: type),
+            keyCode: KeyCode(event.getIntegerValueField(.keyboardEventKeycode)),
+            modifiers: modifiers(from: event.flags)
+        )
+        switch action {
         case .passThrough:
             return Unmanaged.passUnretained(event)
         case .discard:
@@ -94,6 +99,37 @@ private func keyEventTapCallback(
 ) -> Unmanaged<CGEvent>? {
     guard let refcon else { return Unmanaged.passUnretained(event) }
     return Unmanaged<CGKeyEventTap>.fromOpaque(refcon).takeUnretainedValue().handle(type: type, event: event)
+}
+
+private func phase(of type: CGEventType) -> KeyEventPhase {
+    switch type {
+    case .keyDown:
+        .keyDown
+    case .keyUp:
+        .keyUp
+    default:
+        .other
+    }
+}
+
+private func modifiers(from flags: CGEventFlags) -> KeyModifiers {
+    var modifiers: KeyModifiers = []
+    if flags.contains(.maskControl) {
+        modifiers.insert(.control)
+    }
+    if flags.contains(.maskShift) {
+        modifiers.insert(.shift)
+    }
+    if flags.contains(.maskCommand) {
+        modifiers.insert(.command)
+    }
+    if flags.contains(.maskAlternate) {
+        modifiers.insert(.option)
+    }
+    if flags.contains(.maskAlphaShift) {
+        modifiers.insert(.capsLock)
+    }
+    return modifiers
 }
 
 public struct MainAppLoginItem: LoginItemService {

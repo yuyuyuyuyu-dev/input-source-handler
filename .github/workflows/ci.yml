@@ -74,3 +74,16 @@ jobs:
 
       - name: Run Tests
         run: swift test --package-path Core
+
+  core-sdk-independence:
+    name: should not call SDK frameworks from Core
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      # AppKit and friends do not exist on Linux, so this build fails
+      # if any code in Core touches an Apple SDK framework directly.
+      - name: Build Core on Linux
+        run: swift build --package-path Core --target Core

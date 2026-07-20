@@ -3,9 +3,6 @@
 //  Core
 //
 
-import Carbon.HIToolbox
-import CoreGraphics
-
 /// Decides what to do with each keyboard event.
 /// Pure logic with no system calls, so it is fully testable.
 public struct ShortcutRemapper {
@@ -15,18 +12,18 @@ public struct ShortcutRemapper {
         /// Swallow the event (e.g. the keyUp of an already replaced keyDown).
         case discard
         /// Swallow the event and post the given virtual key instead.
-        case discardAndPost(CGKeyCode)
+        case discardAndPost(KeyCode)
     }
 
     /// Key codes whose keyDown was swallowed; the matching keyUp must be swallowed too.
-    private var interceptedKeyCodes: Set<Int64> = []
+    private var interceptedKeyCodes: Set<KeyCode> = []
 
     public init() {}
 
-    public mutating func handle(type: CGEventType, keyCode: Int64, flags: CGEventFlags) -> Action {
-        switch type {
+    public mutating func handle(phase: KeyEventPhase, keyCode: KeyCode, modifiers: KeyModifiers) -> Action {
+        switch phase {
         case .keyDown:
-            guard isTriggerChord(flags), let replacement = Self.replacement(for: keyCode) else {
+            guard isTriggerChord(modifiers), let replacement = Self.replacement(for: keyCode) else {
                 return .passThrough
             }
             interceptedKeyCodes.insert(keyCode)
@@ -36,23 +33,23 @@ public struct ShortcutRemapper {
                 return .passThrough
             }
             return .discard
-        default:
+        case .other:
             return .passThrough
         }
     }
 
     /// Control + Shift are pressed, Command and Option are not.
-    private func isTriggerChord(_ flags: CGEventFlags) -> Bool {
-        flags.contains(.maskControl) && flags.contains(.maskShift)
-            && !flags.contains(.maskCommand) && !flags.contains(.maskAlternate)
+    private func isTriggerChord(_ modifiers: KeyModifiers) -> Bool {
+        modifiers.contains(.control) && modifiers.contains(.shift)
+            && !modifiers.contains(.command) && !modifiers.contains(.option)
     }
 
-    private static func replacement(for keyCode: Int64) -> CGKeyCode? {
+    private static func replacement(for keyCode: KeyCode) -> KeyCode? {
         switch keyCode {
-        case Int64(kVK_ANSI_J):
-            CGKeyCode(kVK_JIS_Kana)
-        case Int64(kVK_ANSI_Semicolon):
-            CGKeyCode(kVK_JIS_Eisu)
+        case .ansiJ:
+            .jisKana
+        case .ansiSemicolon:
+            .jisEisu
         default:
             nil
         }

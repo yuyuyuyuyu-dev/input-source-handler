@@ -5,11 +5,3 @@ excluded:
 # align SwiftLint to require them too instead of fighting over it.
 trailing_comma:
   mandatory_comma: true
-
-custom_rules:
-  no_system_frameworks_in_core:
-    name: "No system frameworks in Core"
-    included: "Core/Sources/Core/.*"
-    regex: '^import (AppKit|Cocoa|ApplicationServices|ServiceManagement|SwiftUI)'
-    message: "Core must not touch side-effectful system frameworks. Put the real implementation in LiveAdapters behind a Core protocol."
-    severity: error

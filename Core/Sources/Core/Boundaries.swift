@@ -3,9 +3,6 @@
 //  Core
 //
 
-import CoreGraphics
-import Foundation
-
 // MARK: - Seams
 
 // The protocols below are the only paths through which the logic touches the OS.
@@ -19,7 +16,7 @@ public protocol AccessibilityPermission {
 
 /// Posts a virtual key press (down + up) to the system.
 public protocol VirtualKeyPoster {
-    func post(_ keyCode: CGKeyCode)
+    func post(_ keyCode: KeyCode)
 }
 
 /// Intercepts keyboard events once started.
