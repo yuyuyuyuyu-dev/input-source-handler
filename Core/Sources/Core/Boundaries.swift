@@ -19,11 +19,12 @@ public protocol VirtualKeyPoster {
     func post(_ keyCode: KeyCode)
 }
 
-/// Intercepts keyboard events once started.
+/// Intercepts keyboard events once started, routing each one to `onKeyEvent`,
+/// which returns true when the original event should be swallowed.
 /// Starting an already running tap is a no-op that reports success.
 public protocol KeyEventTap {
     @discardableResult
-    func start() -> Bool
+    func start(onKeyEvent: @escaping (KeyEventPhase, KeyCode, KeyModifiers) -> Bool) -> Bool
 }
 
 /// Manages the "launch at login" registration of the app.
@@ -54,9 +55,15 @@ public struct InertKeyEventTap: KeyEventTap {
     public init() {}
 
     @discardableResult
-    public func start() -> Bool {
+    public func start(onKeyEvent _: @escaping (KeyEventPhase, KeyCode, KeyModifiers) -> Bool) -> Bool {
         false
     }
+}
+
+public struct InertVirtualKeyPoster: VirtualKeyPoster {
+    public init() {}
+
+    public func post(_: KeyCode) {}
 }
 
 public struct InertLoginItem: LoginItemService {
@@ -67,4 +74,10 @@ public struct InertLoginItem: LoginItemService {
     }
 
     public func setEnabled(_: Bool) throws {}
+}
+
+public struct InertSettingsOpener: SettingsOpener {
+    public init() {}
+
+    public func openAccessibilityPane() {}
 }

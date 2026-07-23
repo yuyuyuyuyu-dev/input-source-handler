@@ -2,6 +2,9 @@
 //  TestDoubles.swift
 //  CoreTests
 //
+//  Every fake here stands in for one external-OS boundary. Nothing else is faked:
+//  the ViewModel builds its real logic (remapping, lifecycle, revert) internally.
+//
 
 @testable import Core
 
@@ -15,14 +18,29 @@ final class AccessibilityPermissionStub: AccessibilityPermission {
     }
 }
 
-final class KeyEventTapSpy: KeyEventTap {
+final class KeyEventTapFake: KeyEventTap {
     var startResult = true
     private(set) var startCallCount = 0
+    private var onKeyEvent: ((KeyEventPhase, KeyCode, KeyModifiers) -> Bool)?
 
     @discardableResult
-    func start() -> Bool {
+    func start(onKeyEvent: @escaping (KeyEventPhase, KeyCode, KeyModifiers) -> Bool) -> Bool {
         startCallCount += 1
+        self.onKeyEvent = onKeyEvent
         return startResult
+    }
+
+    /// Simulates the OS delivering one intercepted key event to whoever started the tap.
+    func simulate(phase: KeyEventPhase, keyCode: KeyCode, modifiers: KeyModifiers) -> Bool {
+        onKeyEvent?(phase, keyCode, modifiers) ?? false
+    }
+}
+
+final class VirtualKeyPosterSpy: VirtualKeyPoster {
+    private(set) var postedKeys: [KeyCode] = []
+
+    func post(_ keyCode: KeyCode) {
+        postedKeys.append(keyCode)
     }
 }
 
@@ -41,6 +59,14 @@ final class LoginItemServiceFake: LoginItemService {
             throw nextError
         }
         isEnabled = enabled
+    }
+}
+
+final class SettingsOpenerSpy: SettingsOpener {
+    private(set) var openAccessibilityPaneCount = 0
+
+    func openAccessibilityPane() {
+        openAccessibilityPaneCount += 1
     }
 }
 

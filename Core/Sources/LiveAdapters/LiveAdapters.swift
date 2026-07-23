@@ -39,17 +39,15 @@ public struct HIDVirtualKeyPoster: VirtualKeyPoster {
 }
 
 public final class CGKeyEventTap: KeyEventTap {
-    private var remapper = ShortcutRemapper()
-    private let poster: any VirtualKeyPoster
+    private var onKeyEvent: ((KeyEventPhase, KeyCode, KeyModifiers) -> Bool)?
     private var tapPort: CFMachPort?
 
-    public init(poster: any VirtualKeyPoster = HIDVirtualKeyPoster()) {
-        self.poster = poster
-    }
+    public init() {}
 
     @discardableResult
-    public func start() -> Bool {
+    public func start(onKeyEvent: @escaping (KeyEventPhase, KeyCode, KeyModifiers) -> Bool) -> Bool {
         guard tapPort == nil else { return true }
+        self.onKeyEvent = onKeyEvent
 
         let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
         let tap = CGEvent.tapCreate(
@@ -73,32 +71,27 @@ public final class CGKeyEventTap: KeyEventTap {
         return true
     }
 
+    /// Translates the CGEvent into Core's own types and asks the handler whether to swallow it.
     fileprivate func handle(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
-        let action = remapper.handle(
-            phase: phase(of: type),
-            keyCode: KeyCode(event.getIntegerValueField(.keyboardEventKeycode)),
-            modifiers: modifiers(from: event.flags)
-        )
-        switch action {
-        case .passThrough:
-            return Unmanaged.passUnretained(event)
-        case .discard:
-            return nil
-        case let .discardAndPost(replacement):
-            poster.post(replacement)
-            return nil
-        }
+        let swallow = onKeyEvent?(
+            phase(of: type),
+            KeyCode(event.getIntegerValueField(.keyboardEventKeycode)),
+            modifiers(from: event.flags)
+        ) ?? false
+        return swallow ? nil : Unmanaged.passUnretained(event)
     }
 }
 
-private func keyEventTapCallback(
+private nonisolated func keyEventTapCallback(
     proxy _: CGEventTapProxy,
     type: CGEventType,
     event: CGEvent,
     refcon: UnsafeMutableRawPointer?
 ) -> Unmanaged<CGEvent>? {
     guard let refcon else { return Unmanaged.passUnretained(event) }
-    return Unmanaged<CGKeyEventTap>.fromOpaque(refcon).takeUnretainedValue().handle(type: type, event: event)
+    let tap = Unmanaged<CGKeyEventTap>.fromOpaque(refcon).takeUnretainedValue()
+    // The run loop source is installed on the main run loop, so this fires on the main actor.
+    return MainActor.assumeIsolated { tap.handle(type: type, event: event) }
 }
 
 private func phase(of type: CGEventType) -> KeyEventPhase {

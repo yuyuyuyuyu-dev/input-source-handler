@@ -4,17 +4,12 @@
 //
 
 import Core
-import LiveAdapters
 import SwiftUI
 
 struct ContentView: View {
-    let monitor: KeyEventMonitor
-    let launchAtLogin: LaunchAtLoginSetting
-    var settingsOpener: any SettingsOpener = WorkspaceSettingsOpener()
+    @Bindable var viewModel: ContentViewModel
 
     var body: some View {
-        @Bindable var launchAtLogin = launchAtLogin
-
         VStack(spacing: 16) {
             Image(systemName: "keyboard")
                 .imageScale(.large)
@@ -24,7 +19,7 @@ struct ContentView: View {
             Text("InputSourceHandler")
                 .font(.headline)
 
-            if monitor.isTrusted {
+            if viewModel.isTrusted {
                 Text("✅ アクセシビリティ権限が許可されています。\nバックグラウンドで動作中です。")
                     .multilineTextAlignment(.center)
                     .font(.caption)
@@ -36,7 +31,7 @@ struct ContentView: View {
                     .foregroundColor(.red)
 
                 Button("システム設定を開く") {
-                    settingsOpener.openAccessibilityPane()
+                    viewModel.openAccessibilitySettings()
                 }
             }
 
@@ -53,7 +48,7 @@ struct ContentView: View {
 
             Divider()
 
-            Toggle("ログイン時に開く", isOn: $launchAtLogin.isEnabled)
+            Toggle("ログイン時に開く", isOn: $viewModel.isLaunchAtLoginEnabled)
                 .font(.caption)
 
             Divider()
@@ -68,8 +63,11 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(
-        monitor: KeyEventMonitor(permission: InertAccessibilityPermission(), eventTap: InertKeyEventTap()),
-        launchAtLogin: LaunchAtLoginSetting(service: InertLoginItem())
-    )
+    ContentView(viewModel: ContentViewModel(
+        permission: InertAccessibilityPermission(),
+        eventTap: InertKeyEventTap(),
+        poster: InertVirtualKeyPoster(),
+        loginItem: InertLoginItem(),
+        settingsOpener: InertSettingsOpener()
+    ))
 }

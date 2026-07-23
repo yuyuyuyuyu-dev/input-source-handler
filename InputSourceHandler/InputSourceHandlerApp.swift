@@ -10,15 +10,17 @@ import SwiftUI
 @main
 struct InputSourceHandlerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var monitor = KeyEventMonitor(
+    @State private var viewModel = ContentViewModel(
         permission: SystemAccessibilityPermission(),
-        eventTap: CGKeyEventTap()
+        eventTap: CGKeyEventTap(),
+        poster: HIDVirtualKeyPoster(),
+        loginItem: MainAppLoginItem(),
+        settingsOpener: WorkspaceSettingsOpener()
     )
-    @State private var launchAtLogin = LaunchAtLoginSetting(service: MainAppLoginItem())
 
     var body: some Scene {
         MenuBarExtra("InputSourceHandler", systemImage: "keyboard") {
-            ContentView(monitor: monitor, launchAtLogin: launchAtLogin)
+            ContentView(viewModel: viewModel)
         }
         .menuBarExtraStyle(.window)
     }
