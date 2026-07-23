@@ -71,3 +71,24 @@ final class SettingsOpenerSpy: SettingsOpener {
 }
 
 struct FakeError: Error {}
+
+/// Builds the system under test. Its five parameters are exactly the fakes above — the
+/// app's external-OS boundaries — so every test that uses it fakes only external I/O
+/// by construction, and runs the ViewModel's own logic for real.
+func makeViewModel(
+    permission: AccessibilityPermissionStub = .init(),
+    tap: KeyEventTapFake = .init(),
+    poster: VirtualKeyPosterSpy = .init(),
+    loginItem: LoginItemServiceFake = .init(),
+    settingsOpener: SettingsOpenerSpy = .init()
+) -> ContentViewModel {
+    ContentViewModel(
+        permission: permission,
+        eventTap: tap,
+        poster: poster,
+        loginItem: loginItem,
+        settingsOpener: settingsOpener
+    )
+}
+
+let controlShift: KeyModifiers = [.control, .shift]
