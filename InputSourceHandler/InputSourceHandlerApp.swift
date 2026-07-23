@@ -3,17 +3,24 @@
 //  InputSourceHandler
 //
 
+import Core
+import LiveAdapters
 import SwiftUI
 
 @main
 struct InputSourceHandlerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @StateObject private var monitor = KeyEventMonitor()
+    @State private var viewModel = ContentViewModel(
+        permission: SystemAccessibilityPermission(),
+        eventTap: CGKeyEventTap(),
+        poster: HIDVirtualKeyPoster(),
+        loginItem: MainAppLoginItem(),
+        settingsOpener: WorkspaceSettingsOpener()
+    )
 
     var body: some Scene {
         MenuBarExtra("InputSourceHandler", systemImage: "keyboard") {
-            ContentView()
-                .environmentObject(monitor)
+            ContentView(viewModel: viewModel)
         }
         .menuBarExtraStyle(.window)
     }

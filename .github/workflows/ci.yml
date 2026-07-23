@@ -73,11 +73,21 @@ jobs:
           xcode-version: latest-stable
 
       - name: Run Tests
-        run: |
-          xcodebuild test \
-            -project InputSourceHandler.xcodeproj \
-            -scheme InputSourceHandler \
-            -destination 'platform=macOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+        run: swift test --package-path Core
+
+  # Tests fake the five OS boundaries and run everything else in Core for real,
+  # which is what makes "the fakes are only external I/O" enough to review them by.
+  # A direct SDK call in Core would be a code path no fake can stand in for, so it
+  # would quietly run the real system during tests — the accessibility prompt, a real
+  # key press — and that review shortcut would no longer hold.
+  core-sdk-independence:
+    name: should not call SDK frameworks from Core
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      # Linux has no AppKit or friends, so such a call cannot even compile here.
+      - name: Build Core on Linux
+        run: swift build --package-path Core --target Core

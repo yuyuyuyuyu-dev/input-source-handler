@@ -3,12 +3,11 @@
 //  InputSourceHandler
 //
 
-import ServiceManagement
+import Core
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var monitor: KeyEventMonitor
-    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @Bindable var viewModel: ContentViewModel
 
     var body: some View {
         VStack(spacing: 16) {
@@ -20,7 +19,7 @@ struct ContentView: View {
             Text("InputSourceHandler")
                 .font(.headline)
 
-            if monitor.isTrusted {
+            if viewModel.isTrusted {
                 Text("✅ アクセシビリティ権限が許可されています。\nバックグラウンドで動作中です。")
                     .multilineTextAlignment(.center)
                     .font(.caption)
@@ -32,8 +31,7 @@ struct ContentView: View {
                     .foregroundColor(.red)
 
                 Button("システム設定を開く") {
-                    let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                    NSWorkspace.shared.open(url)
+                    viewModel.openAccessibilitySettings()
                 }
             }
 
@@ -50,20 +48,7 @@ struct ContentView: View {
 
             Divider()
 
-            Toggle("ログイン時に開く", isOn: $launchAtLogin)
-                .onChange(of: launchAtLogin) { newValue in
-                    do {
-                        if newValue {
-                            if SMAppService.mainApp.status == .enabled { return }
-                            try SMAppService.mainApp.register()
-                        } else {
-                            try SMAppService.mainApp.unregister()
-                        }
-                    } catch {
-                        print("Failed to change login item: \(error)")
-                        launchAtLogin = SMAppService.mainApp.status == .enabled
-                    }
-                }
+            Toggle("ログイン時に開く", isOn: $viewModel.isLaunchAtLoginEnabled)
                 .font(.caption)
 
             Divider()
@@ -78,6 +63,11 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
-        .environmentObject(KeyEventMonitor())
+    ContentView(viewModel: ContentViewModel(
+        permission: InertAccessibilityPermission(),
+        eventTap: InertKeyEventTap(),
+        poster: InertVirtualKeyPoster(),
+        loginItem: InertLoginItem(),
+        settingsOpener: InertSettingsOpener()
+    ))
 }
