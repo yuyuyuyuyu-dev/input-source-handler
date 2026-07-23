@@ -75,6 +75,11 @@ jobs:
       - name: Run Tests
         run: swift test --package-path Core
 
+  # Tests fake the five OS boundaries and run everything else in Core for real,
+  # which is what makes "the fakes are only external I/O" enough to review them by.
+  # A direct SDK call in Core would be a code path no fake can stand in for, so it
+  # would quietly run the real system during tests — the accessibility prompt, a real
+  # key press — and that review shortcut would no longer hold.
   core-sdk-independence:
     name: should not call SDK frameworks from Core
     runs-on: ubuntu-latest
@@ -83,7 +88,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      # AppKit and friends do not exist on Linux, so this build fails
-      # if any code in Core touches an Apple SDK framework directly.
+      # Linux has no AppKit or friends, so such a call cannot even compile here.
       - name: Build Core on Linux
         run: swift build --package-path Core --target Core
