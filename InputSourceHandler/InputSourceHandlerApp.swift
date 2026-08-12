@@ -57,7 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showContextMenu() {
-        guard let button = statusItem?.button else { return }
+        guard let statusItem else { return }
 
         let menu = NSMenu()
         for command in viewModel.menuBarContextMenu {
@@ -66,7 +66,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             item.representedObject = command
             menu.addItem(item)
         }
-        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 5), in: button)
+
+        // Handing the menu to the status item lets the system draw it in the menu bar's
+        // own material and highlight the icon. Popping it up from the button instead
+        // inherits the menu bar's vibrant appearance, which has nothing to blend with
+        // once the menu is its own window, and renders as a flat dark background.
+        statusItem.menu = menu
+        statusItem.button?.performClick(nil)
+        statusItem.menu = nil
     }
 
     @objc private func runContextMenuCommand(_ sender: NSMenuItem) {
