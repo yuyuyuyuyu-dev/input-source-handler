@@ -1,4 +1,5 @@
 excluded:
+  - .build
   - Core/.build
 
 # SwiftFormat's default inserts trailing commas in multiline collections;
