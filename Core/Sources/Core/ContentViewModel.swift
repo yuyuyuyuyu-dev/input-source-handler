@@ -6,16 +6,31 @@
 import Foundation
 import Observation
 
+/// A command the menu bar icon's context menu offers.
+public enum ContextMenuCommand: Sendable {
+    case quit
+
+    public var title: String {
+        switch self {
+        case .quit:
+            "終了"
+        }
+    }
+}
+
 /// Backs `ContentView` and coordinates the whole app: it watches the accessibility
 /// permission, remaps intercepted key events, and mirrors the launch-at-login setting.
 ///
 /// Every dependency it takes is an external-OS boundary. All the decision logic
 /// (remapping rules, the trust-then-intercept lifecycle, launch-at-login revert)
-/// is real and lives inside, so a test that fakes only these five boundaries exercises
+/// is real and lives inside, so a test that fakes only these six boundaries exercises
 /// the genuine behaviour.
 @Observable
 public final class ContentViewModel {
     public private(set) var isTrusted = false
+
+    /// The commands the menu bar icon's context menu lists, in display order.
+    public let menuBarContextMenu: [ContextMenuCommand] = [.quit]
 
     public var isLaunchAtLoginEnabled: Bool {
         didSet { applyLaunchAtLogin(from: oldValue) }
@@ -26,6 +41,7 @@ public final class ContentViewModel {
     private let poster: any VirtualKeyPoster
     private let loginItem: any LoginItemService
     private let settingsOpener: any SettingsOpener
+    private let terminator: any AppTerminator
 
     @ObservationIgnored private var remapper = ShortcutRemapper()
     @ObservationIgnored private var isIntercepting = false
@@ -37,13 +53,15 @@ public final class ContentViewModel {
         eventTap: any KeyEventTap,
         poster: any VirtualKeyPoster,
         loginItem: any LoginItemService,
-        settingsOpener: any SettingsOpener
+        settingsOpener: any SettingsOpener,
+        terminator: any AppTerminator
     ) {
         self.permission = permission
         self.eventTap = eventTap
         self.poster = poster
         self.loginItem = loginItem
         self.settingsOpener = settingsOpener
+        self.terminator = terminator
         isLaunchAtLoginEnabled = loginItem.isEnabled
 
         refreshTrust(promptIfNeeded: true)
@@ -91,6 +109,13 @@ public final class ContentViewModel {
 
     public func openAccessibilitySettings() {
         settingsOpener.openAccessibilityPane()
+    }
+
+    public func perform(_ command: ContextMenuCommand) {
+        switch command {
+        case .quit:
+            terminator.terminate()
+        }
     }
 
     private func applyLaunchAtLogin(from oldValue: Bool) {

@@ -53,8 +53,8 @@ struct ContentView: View {
 
             Divider()
 
-            Button("終了") {
-                NSApplication.shared.terminate(nil)
+            Button(ContextMenuCommand.quit.title) {
+                viewModel.perform(.quit)
             }
         }
         .padding()
@@ -68,6 +68,7 @@ struct ContentView: View {
         eventTap: InertKeyEventTap(),
         poster: InertVirtualKeyPoster(),
         loginItem: InertLoginItem(),
-        settingsOpener: InertSettingsOpener()
+        settingsOpener: InertSettingsOpener(),
+        terminator: InertAppTerminator()
     ))
 }

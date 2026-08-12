@@ -70,9 +70,17 @@ final class SettingsOpenerSpy: SettingsOpener {
     }
 }
 
+final class AppTerminatorSpy: AppTerminator {
+    private(set) var terminateCount = 0
+
+    func terminate() {
+        terminateCount += 1
+    }
+}
+
 struct FakeError: Error {}
 
-/// Builds the system under test. Its five parameters are exactly the fakes above — the
+/// Builds the system under test. Its six parameters are exactly the fakes above — the
 /// app's external-OS boundaries — so every test that uses it fakes only external I/O
 /// by construction, and runs the ViewModel's own logic for real.
 func makeViewModel(
@@ -80,14 +88,16 @@ func makeViewModel(
     tap: KeyEventTapFake = .init(),
     poster: VirtualKeyPosterSpy = .init(),
     loginItem: LoginItemServiceFake = .init(),
-    settingsOpener: SettingsOpenerSpy = .init()
+    settingsOpener: SettingsOpenerSpy = .init(),
+    terminator: AppTerminatorSpy = .init()
 ) -> ContentViewModel {
     ContentViewModel(
         permission: permission,
         eventTap: tap,
         poster: poster,
         loginItem: loginItem,
-        settingsOpener: settingsOpener
+        settingsOpener: settingsOpener,
+        terminator: terminator
     )
 }
 

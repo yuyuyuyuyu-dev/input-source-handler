@@ -150,3 +150,11 @@ public struct WorkspaceSettingsOpener: SettingsOpener {
         NSWorkspace.shared.open(url)
     }
 }
+
+public struct SharedApplicationTerminator: AppTerminator {
+    public init() {}
+
+    public func terminate() {
+        NSApplication.shared.terminate(nil)
+    }
+}
