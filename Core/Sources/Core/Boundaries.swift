@@ -38,6 +38,11 @@ public protocol SettingsOpener {
     func openAccessibilityPane()
 }
 
+/// Ends the running app.
+public protocol AppTerminator {
+    func terminate()
+}
+
 // MARK: - Inert implementations
 
 // Fixed, side-effect-free stand-ins for previews and other contexts that need
@@ -80,4 +85,10 @@ public struct InertSettingsOpener: SettingsOpener {
     public init() {}
 
     public func openAccessibilityPane() {}
+}
+
+public struct InertAppTerminator: AppTerminator {
+    public init() {}
+
+    public func terminate() {}
 }
