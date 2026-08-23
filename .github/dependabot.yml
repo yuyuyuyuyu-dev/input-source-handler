@@ -9,10 +9,14 @@ updates:
     open-pull-requests-limit: 1
     groups:
       # CI runs on macOS runners, so one PR per action bump would mean one full
-      # macOS build+test cycle each. Bundle them into a single PR instead.
+      # macOS build+test cycle each. Bundle the auto-merged ones into a single PR
+      # instead.
       actions:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   # No external Swift dependencies today (Core is a local package, the .xcodeproj
   # has no remote package references), so this produces no PRs yet. It's here so a
@@ -29,3 +33,6 @@ updates:
       swift:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"

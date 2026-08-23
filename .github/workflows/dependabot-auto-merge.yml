@@ -1,0 +1,38 @@
+name: Dependabot Auto-merge
+
+# pull_request_target rather than pull_request: a run triggered by Dependabot itself
+# can only read Dependabot secrets, so the App private key would come back empty.
+# Nothing from the pull request is checked out or executed here, which is what keeps
+# running in the base branch's context safe.
+on: pull_request_target
+
+permissions:
+  pull-requests: read
+
+jobs:
+  auto-merge:
+    name: Auto-merge
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.AUTO_MERGE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.AUTO_MERGE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Fetch Dependabot Metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+
+      - name: Enable Auto-merge
+        if: >-
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          || steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: gh pr merge --squash --auto "$PR_URL"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
