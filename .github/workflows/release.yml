@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*' # e.g. runs when a tag like v1.0.0 is pushed
+      - "v*" # e.g. runs when a tag like v1.0.0 is pushed
 
 jobs:
   build_and_release:

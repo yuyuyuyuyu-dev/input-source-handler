@@ -18,6 +18,19 @@ updates:
           - "minor"
           - "patch"
 
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 1
+    groups:
+      npm:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
   # No external Swift dependencies today (Core is a local package, the .xcodeproj
   # has no remote package references), so this produces no PRs yet. It's here so a
   # future external dependency is picked up automatically. `directories` covers both
