@@ -12,6 +12,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  biome:
+    name: Biome
+    permissions:
+      contents: read
+    uses: yuyuyuyuyu-dev/repo-config/.github/workflows/biome.yml@main
+
   format:
     name: Format (SwiftFormat)
     runs-on: macos-26

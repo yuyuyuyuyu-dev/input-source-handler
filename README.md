@@ -17,7 +17,7 @@ brew install --cask input-source-handler
 
 ## Permissions
 
-This application requires **Accessibility** permissions to intercept keyboard events. 
+This application requires **Accessibility** permissions to intercept keyboard events.
 
 Please grant access to the app in:
 
