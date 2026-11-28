@@ -1,9 +1,11 @@
 {
 	"private": true,
 	"devDependencies": {
-		"@biomejs/biome": "2.6.9"
+		"@biomejs/biome": "2.6.9",
+		"@resvg/resvg-js": "^2.6.2"
 	},
 	"scripts": {
-		"biome": "biome"
+		"biome": "biome",
+		"icon": "node Icon/render.mjs"
 	}
 }
